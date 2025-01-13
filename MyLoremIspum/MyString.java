@@ -21,6 +21,7 @@ public class MyString {
             if(str.substring(i, i + target.length()).equals(target))
                 count++;
         }
+        
         return count;
     }
     public static void main(String[] args) {
