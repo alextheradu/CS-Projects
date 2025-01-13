@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="BadGames/src"/>
+	<classpathentry kind="src" path="Intro/src"/>
+	<classpathentry kind="src" path="November/src"/>
+	<classpathentry kind="src" path="October/src"/>
+	<classpathentry kind="src" path="Output Project/src"/>
+	<classpathentry kind="src" path="September/MadLibs"/>
+	<classpathentry kind="src" path="Games"/>
+	<classpathentry kind="src" path="Pictures"/>
+	<classpathentry kind="src" path="Exploring"/>
+	<classpathentry excluding="BadGames/src/|Intro/src/|November/src/|October/src/|Output Project/src/|September/MadLibs/|Games/|Pictures/|Exploring/" kind="src" path=""/>
+	<classpathentry kind="output" path="BadGames/bin"/>
+</classpath>
