@@ -53,12 +53,13 @@ public class Snowyman extends JPanel implements MouseListener, MouseMotionListen
 
       jesseX = jesseY = 0;
       jesseW = jesseH = 50;
-      Timer timer = new Timer(75, new ActionListener() {
+      Timer timer = new Timer(1, new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) 
 				{
-               xc1+=2;
-               xc2+=2;
+               s1.fall(PREF_H, PREF_W);
+               xc1++;
+               xc2++;
                //make it so if the clouds go off screen, they go to the other side
                if(xc1 > 800)
                   xc1 = -200;

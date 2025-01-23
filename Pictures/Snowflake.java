@@ -1,5 +1,5 @@
 import java.awt.Color;
-
+import java.awt.Graphics2D;
 //Alex Radu
 //Jan 23, 2025
 
@@ -33,8 +33,19 @@ public class Snowflake {
       this.dx = dx;
       this.speed = speed;
    }
+
+   //Methods... Methods are functions that apply to each object of the class.
+
    public void draw(Graphics2D g2) {
       g2.setColor(Color.WHITE);
       g2.fillOval(x, y, w, h);
+   }
+   public void fall(int PREF_H, int PREF_W) {
+      y += dy;
+      if(y > (PREF_H) - 150) {
+         y = -20;
+         x = (int) (Math.random() * 800);
+      }
+      System.out.println("Falling: " + x + ", " + y + ", " + dx + ", " + dy);
    }
 }
