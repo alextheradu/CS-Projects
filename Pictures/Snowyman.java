@@ -23,7 +23,7 @@ import javax.swing.Timer;
 //Honors Computer Science - Alex Radu
 //Program Description: Building a Snowman on a Java Panel
 
-public class Snowman extends JPanel implements MouseListener, MouseMotionListener, KeyListener
+public class Snowyman extends JPanel implements MouseListener, MouseMotionListener, KeyListener
 {
    //Variables for the class
    private static final long serialVersionUID = 1L;
@@ -38,14 +38,19 @@ public class Snowman extends JPanel implements MouseListener, MouseMotionListene
    private List<Integer> pressedKeys = new ArrayList<>();
    private int jesseX, jesseY, jesseW, jesseH;
    
+   private Snowflake s1;
+
    //Class constructor
-   public Snowman()
+   public Snowyman()
    {
       this.setFocusable(true);
       this.setBackground(Color.WHITE);
       this.addMouseListener(this);
       this.addMouseMotionListener(this);
       this.addKeyListener(this);
+
+      s1 = new Snowflake(300, 50, 20, 20, 1, 1);
+
       jesseX = jesseY = 0;
       jesseW = jesseH = 50;
       Timer timer = new Timer(75, new ActionListener() {
@@ -142,14 +147,8 @@ public class Snowman extends JPanel implements MouseListener, MouseMotionListene
       g2.fillPolygon(xs13, ys13, xs13.length);
       g2.setColor(Color.BLACK);
       g2.drawPolygon(xs13, ys13, xs13.length);
-      //draw 500 tiny snowflakes
-      for(int i = 0; i < 500; i++)
-      {
-         int x = (int)(Math.random()*800);
-         int y = (int)(Math.random()*400);
-         g2.setColor(Color.WHITE);
-         g2.fillOval(x, y, 5, 5);
-      }
+      //Draw snowflakes
+      s1.draw(g2);
       //Bottom snowball
       g2.setColor(Color.BLACK);
       g2.drawOval(275, 350, 250, 220);
@@ -260,7 +259,7 @@ public class Snowman extends JPanel implements MouseListener, MouseMotionListene
    public static void createAndShowGUI()
    {
       JFrame frame = new JFrame("Do You Want to Build a Snowman? (Amazing Project by: Alex Radu)");
-      JPanel gamePanel = new Snowman();
+      JPanel gamePanel = new Snowyman();
       
       frame.getContentPane().add(gamePanel);
       frame.pack();
