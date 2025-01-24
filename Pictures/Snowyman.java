@@ -19,7 +19,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-   
+
 //Honors Computer Science - Alex Radu
 //Program Description: Building a Snowman on a Java Panel
 
@@ -39,6 +39,7 @@ public class Snowyman extends JPanel implements MouseListener, MouseMotionListen
    private int jesseX, jesseY, jesseW, jesseH;
    
    private Snowflake s1;
+   private Snowflake s2;
 
    //Class constructor
    public Snowyman()
@@ -50,6 +51,7 @@ public class Snowyman extends JPanel implements MouseListener, MouseMotionListen
       this.addKeyListener(this);
 
       s1 = new Snowflake(300, 50, 20, 20, 1, 1);
+      s1 = new Snowflake(400, 50, 10, 10, 1, 2);
 
       jesseX = jesseY = 0;
       jesseW = jesseH = 50;
@@ -58,6 +60,7 @@ public class Snowyman extends JPanel implements MouseListener, MouseMotionListen
 				public void actionPerformed(ActionEvent e) 
 				{
                s1.fall(PREF_H, PREF_W);
+               s2.fall(PREF_H, PREF_W);
                xc1++;
                xc2++;
                //make it so if the clouds go off screen, they go to the other side
@@ -150,6 +153,7 @@ public class Snowyman extends JPanel implements MouseListener, MouseMotionListen
       g2.drawPolygon(xs13, ys13, xs13.length);
       //Draw snowflakes
       s1.draw(g2);
+      s2.draw(g2);
       //Bottom snowball
       g2.setColor(Color.BLACK);
       g2.drawOval(275, 350, 250, 220);
@@ -226,7 +230,7 @@ public class Snowyman extends JPanel implements MouseListener, MouseMotionListen
       g2.setColor(Color.BLACK);
       g2.drawPolygon(xs7, ys7, xs7.length);
       
-      // //draw rigt arm
+      //draw rigt arm
       int[] xs8 = {485, 593, 594, 594, 604, 602, 620, 620, 604, 490};
       int[] ys8 = {272, 251, 223, 223, 223, 246, 248, 257, 257, 283};
       g2.setColor(Color.GRAY);

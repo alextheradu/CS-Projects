@@ -22,10 +22,10 @@ public class MyString {
                 return i;
         return -1;
     }
-    public String Reverse(String str) {
+    public String reverse() {
         String rts = "";
-        for(int i = str.length() - 1; i >= 0; i--)
-            rts = rts + str.charAt(i);
+        for(int i = myText.length() - 1; i >= 0; i--)
+            rts = rts + myText.charAt(i);
         return rts;
     }
     public static String textReverse(String str) {

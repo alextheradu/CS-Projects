@@ -91,7 +91,6 @@ public class JavaGame extends JPanel implements MouseListener, MouseMotionListen
 	public Dimension getPreferredSize()
 	{
 		return new Dimension(800,600);
-		
 	}
 	public static void main(String[] args) {
 		JFrame frame = new JFrame("My first bad game");

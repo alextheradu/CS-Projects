@@ -38,7 +38,7 @@ public class Snowflake {
 
    public void draw(Graphics2D g2) {
       g2.setColor(Color.WHITE);
-      g2.fillOval(x, y, w, h);
+      g2.fillOval((int) x, (int) y, (int) w, (int) h);
    }
    public void fall(int PREF_H, int PREF_W) {
       y += dy;
