@@ -1,0 +1,5 @@
+{
+    "java.jdt.ls.java.home": "/Library/Caches/.vscode/extensions/redhat.java-1.39.0-darwin-arm64/jre/21.0.5-macosx-aarch64",
+    "java.debug.settings.onBuildFailureProceed": true
+        // "java.jdt.ls.java.home": "/Library/Caches/java21/Contents/Home/bin/java"
+}
