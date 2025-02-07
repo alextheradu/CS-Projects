@@ -24,8 +24,7 @@ import javax.swing.Timer;
 //Honors Computer Science - Alex Radu
 //Program Description: Building a Snowman on a Java Panel
 
-public class Snowyman extends JPanel implements MouseListener, MouseMotionListener, KeyListener
-{
+public class Snowyman extends JPanel implements MouseListener, MouseMotionListener, KeyListener {
    //Variables for the class
    private static final long serialVersionUID = 1L;
    public static final int PREF_W = 800;
@@ -41,8 +40,7 @@ public class Snowyman extends JPanel implements MouseListener, MouseMotionListen
    private Snowflake s1;
    private Snowflake s2;
    private ArrayList<Snowflake> blizzard = new ArrayList<Snowflake>();
-   
-
+   private int currentIndex;
 
    //Class constructor
    public Snowyman()
@@ -52,18 +50,25 @@ public class Snowyman extends JPanel implements MouseListener, MouseMotionListen
       this.addMouseListener(this);
       this.addMouseMotionListener(this);
       this.addKeyListener(this);
-
+      currentIndex = 0;
       s1 = new Snowflake(300, 50, 20, 20, 1, (Math.random() * 4) + 1);  // Random speed between 1-5
       s2 = new Snowflake(400, 50, 10, 10, 1, (Math.random() * 4) + 1);  // Random speed between 1-5
 
       blizzard = new ArrayList<Snowflake>();
-      for(int i = 0; i < 100; i++)
-      {
-         int h1 = (int)(Math.random() * 13) + 8;
-         double randomSpeed = (Math.random() * 4) + 1;  // Random speed between 1-5
-         blizzard.add(new Snowflake((int)(Math.random() * PREF_W), (int)(Math.random() * PREF_H), h1, h1, 1, randomSpeed));
+      for(int i = 0; i < 100; i++) {
+         int size = (int)(Math.random() * 13) + 8;
+         double speed = (Math.random() * 4) + 1;
+         double dx = (Math.random() * 2) - 1;  // Random horizontal speed between -1 and 1
+         blizzard.add(new Snowflake(
+             (int)(Math.random() * PREF_W),  // random x
+             (int)(Math.random() * PREF_H),  // random y
+             size, size,                     // width, height
+             1,                             // dy
+             dx,                            // dx
+             speed                          // unique speed
+         ));
       }
-
+   
 
       jesseX = jesseY = 0;
       jesseW = jesseH = 50;
@@ -175,6 +180,7 @@ public class Snowyman extends JPanel implements MouseListener, MouseMotionListen
 
       for(Snowflake s : blizzard)
       {
+         s.fall(PREF_H, PREF_W);
          s.draw(g2);
       }
       //Bottom snowball
@@ -371,65 +377,20 @@ public class Snowyman extends JPanel implements MouseListener, MouseMotionListen
 	@Override
 	public void keyPressed(KeyEvent e) {
         int keyPressed = e.getKeyCode();
-        if (!pressedKeys.contains(keyPressed)) {
-            pressedKeys.add(keyPressed);
+        
+        if(keyPressed == KeyEvent.VK_C) {
+         blizzard.get(currentIndex).setColor(Color.RED);
+         currentIndex++; 
+         if(currentIndex >= blizzard.size()) {
+            currentIndex = blizzard.size()-1;
+         }  
         }
-        System.out.println("Key Pressed");
-        System.out.println(keyPressed);
-        if(keyPressed == 39)
-		{
-			right = true; left = false; up = false; down = false;
-		}
-        else if(keyPressed == 37)
-		{ 
-			left = true; right = false; up = false; down = false;
-		}
-        else if(keyPressed == 38){
-			up = true; right = false; left = false; down = false;
-		}
-        else if(keyPressed == 40)
-		{ 
-			down = true; right = false; left = false; up = false;
-		}
-        if(keyPressed == 39) isFacingRight = true;
-        else if(keyPressed == 37) isFacingRight = false;
 	}
 	@Override
 	public void keyReleased(KeyEvent e) {
-        int keyReleased = e.getKeyCode();
-        pressedKeys.remove(Integer.valueOf(keyReleased));
-        {
-			left = right = up = down = false;
-        
-        // Handle horizontal direction
-        for (int i = pressedKeys.size() - 1; i >= 0; i--) {
-            int key = pressedKeys.get(i);
-            if (key == KeyEvent.VK_LEFT) {
-                left = true;
-                isFacingRight = false;
-            } else if (key == KeyEvent.VK_RIGHT) {
-                right = true;
-                isFacingRight = true;
-            }
-        }
-        
-        // Handle vertical direction
-        for (int i = pressedKeys.size() - 1; i >= 0; i--) {
-            int key = pressedKeys.get(i);
-            if (key == KeyEvent.VK_UP) {
-                up = true;
-            } else if (key == KeyEvent.VK_DOWN) {
-                down = true;
-            }
-		}
-        if(keyReleased == 39) right = false;
-        else if(keyReleased == 37) left = false;
-        else if(keyReleased == 38) up = false;
-        else if(keyReleased == 40) down = false;
-
-	}
-	}
-
+      // TODO Auto-generated method stub
+      throw new UnsupportedOperationException("Unimplemented method 'keyReleased'");
+}
    @Override
    public void keyTyped(KeyEvent e) {
       // TODO Auto-generated method stub

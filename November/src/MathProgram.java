@@ -13,8 +13,8 @@ public class MathProgram
 		return isPrime;
 		
 	}
-	public static float slope(float x1, float y1, float x2, 
-               float y2) 
+	public static int slope(int x1, int y1, int x2, 
+               int y2) 
 	{ 
 	 if (x2 - x1 != 0) 
 	     return (y2 - y1) / (x2 - x1); 
@@ -45,6 +45,12 @@ public class MathProgram
 			getDayName = "Friday";
 		return getDayName;
 	}
+
+	public static void main(String[] args) {
+	    int x1 = 1, y1 = 2, x2 = 3, y2 = 4;
+	    int result = slope(x1, y1, x2, y2);
+	    System.out.println("The slope of the line is: " + result);
+	}
 }
-	
+
 

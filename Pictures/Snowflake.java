@@ -16,7 +16,11 @@ public class Snowflake {
       this.w = w;
       this.h = h;
       this.dy = dy;
-      color = new Color((int) (Math.random() * 256), (int) (Math.random() * 256), (int) (Math.random() * 256));
+      color = Color.white;
+   }
+   
+   public void changeColor() {
+      color = Color.RED;
    }
    public Snowflake(int x, int y, int w, int h, double dy, double speed) {
       this.x = x;
@@ -25,7 +29,7 @@ public class Snowflake {
       this.h = h;
       this.dy = dy;
       this.speed = speed;
-      color = new Color((int) (Math.random() * 256), (int) (Math.random() * 256), (int) (Math.random() * 256));
+      color = Color.white;
    }
    public Snowflake(int x, int y, int w, int h, double dy, double dx, double speed) {
       this.x = x;
@@ -35,14 +39,14 @@ public class Snowflake {
       this.dy = dy;
       this.dx = dx;
       this.speed = speed;
-      color = new Color((int) (Math.random() * 256), (int) (Math.random() * 256), (int) (Math.random() * 256));
+      color = Color.white;
    }
 
    //Methods... Methods are functions that apply to each object of the class.
 
    public void draw(Graphics2D g2) {
       g2.setColor(color);
-      g2.fillOval((int) x, (int) y, w, h);
+      g2.fillRect((int) x, (int) y, w, h);
    }
    public void fall(int PREF_H, int PREF_W) {
       y += speed;  // Use the speed parameter instead of dy
@@ -52,6 +56,18 @@ public class Snowflake {
          // Optionally randomize speed when resetting position
          speed = (Math.random() * 4) + 1;  // Random speed between 1-5
       }
-      System.out.println("Falling: " + x + ", " + y + ", " + dx + ", dy");
+      // System.out.println("Falling: " + x + ", " + y + ", " + dx + ", dy");
+   }
+
+   public void increaseSpeed() {
+      speed += 0.2;
+   }
+
+   public void decreaseSpeed() {
+      speed = Math.max(0.2, speed - 0.2);
+   }
+
+   public void setColor(Color color) {
+      this.color = color;
    }
 }
