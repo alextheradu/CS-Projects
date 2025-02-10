@@ -48,25 +48,47 @@ public class Snowflake {
       g2.setColor(color);
       g2.fillRect((int) x, (int) y, w, h);
    }
+   public void fallSideways (int PREF_H, int PREF_W) {
+      y += speed;  // Use the speed parameter instead of dy
+      x += speed;
+      if(y > (PREF_H)) {
+         y = -20;
+         x = (int) (Math.random() * 800) - 200;
+         // Optionally randomize speed when resetting position
+         // speed = (Math.random() * 4) + 1;  // Random speed between 1-5
+      }
+      if(x > (PREF_W)) {
+         y = -20;
+         x = (int) (Math.random() * 800) - 200;
+         // Optionally randomize speed when resetting position
+         // speed = (Math.random() * 4) + 1;  // Random speed between 1-5
+      }
+   }
    public void fall(int PREF_H, int PREF_W) {
       y += speed;  // Use the speed parameter instead of dy
       if(y > (PREF_H) - 150) {
          y = -20;
          x = (int) (Math.random() * 800);
          // Optionally randomize speed when resetting position
-         speed = (Math.random() * 4) + 1;  // Random speed between 1-5
+         // speed = (Math.random() * 4) + 1;  // Random speed between 1-5
       }
       // System.out.println("Falling: " + x + ", " + y + ", " + dx + ", dy");
    }
 
    public void increaseSpeed() {
-      speed += 0.2;
+      speed = 1.2 * speed;
    }
 
    public void decreaseSpeed() {
-      speed = Math.max(0.2, speed - 0.2);
+      speed = (double) 0.8 * speed;
+      if(speed <= 1) {
+         speed = 1;
+      } 
    }
-
+   
+   public double getSpeed() {
+      return speed;
+   }
    public void setColor(Color color) {
       this.color = color;
    }

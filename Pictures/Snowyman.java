@@ -41,6 +41,7 @@ public class Snowyman extends JPanel implements MouseListener, MouseMotionListen
    private Snowflake s2;
    private ArrayList<Snowflake> blizzard = new ArrayList<Snowflake>();
    private int currentIndex;
+   private int index2;
 
    //Class constructor
    public Snowyman()
@@ -51,8 +52,9 @@ public class Snowyman extends JPanel implements MouseListener, MouseMotionListen
       this.addMouseMotionListener(this);
       this.addKeyListener(this);
       currentIndex = 0;
-      s1 = new Snowflake(300, 50, 20, 20, 1, (Math.random() * 4) + 1);  // Random speed between 1-5
-      s2 = new Snowflake(400, 50, 10, 10, 1, (Math.random() * 4) + 1);  // Random speed between 1-5
+      index2 = 0;
+      // s1 = new Snowflake(300, 50, 20, 20, 1, (Math.random() * 4) + 1);  // Random speed between 1-5
+      // s2 = new Snowflake(400, 50, 10, 10, 1, (Math.random() * 4) + 1);  // Random speed between 1-5
 
       blizzard = new ArrayList<Snowflake>();
       for(int i = 0; i < 100; i++) {
@@ -76,12 +78,12 @@ public class Snowyman extends JPanel implements MouseListener, MouseMotionListen
 				@Override
 				public void actionPerformed(ActionEvent e) 
 				{
-               s1.fall(PREF_H, PREF_W);
-               s2.fall(PREF_H, PREF_W);
+               // s1.fallSideways(PREF_H, PREF_W);
+               // s2.fallSideways(PREF_H, PREF_W);
 
                for(Snowflake s : blizzard)
                {
-                  s.fall(PREF_H, PREF_W);
+                  s.fallSideways(PREF_H, PREF_W);
                }
 
                xc1++;
@@ -175,8 +177,6 @@ public class Snowyman extends JPanel implements MouseListener, MouseMotionListen
       g2.setColor(Color.BLACK);
       g2.drawPolygon(xs13, ys13, xs13.length);
       //Draw snowflakes
-      s1.draw(g2);
-      s2.draw(g2);
 
       for(Snowflake s : blizzard)
       {
@@ -317,8 +317,8 @@ public class Snowyman extends JPanel implements MouseListener, MouseMotionListen
    @Override
    public void mousePressed(MouseEvent e)
    {
+
    }
-   
    @Override
    public void mouseReleased(MouseEvent e)
    {
@@ -367,7 +367,6 @@ public class Snowyman extends JPanel implements MouseListener, MouseMotionListen
       xList.add(e.getX());
       yList.add(e.getY());
       repaint();
-
    }
 
    @Override
@@ -378,22 +377,51 @@ public class Snowyman extends JPanel implements MouseListener, MouseMotionListen
 	public void keyPressed(KeyEvent e) {
         int keyPressed = e.getKeyCode();
         
-        if(keyPressed == KeyEvent.VK_C) {
-         blizzard.get(currentIndex).setColor(Color.RED);
-         currentIndex++; 
-         if(currentIndex >= blizzard.size()) {
-            currentIndex = blizzard.size()-1;
-         }  
+         if(keyPressed == KeyEvent.VK_C) {
+            blizzard.get(currentIndex).setColor(Color.RED);
+            currentIndex++; 
+            if(currentIndex >= blizzard.size())
+               currentIndex = blizzard.size()-1;
         }
+        if(keyPressed == KeyEvent.VK_EQUALS) {
+         for(Snowflake s : blizzard) {
+            s.increaseSpeed();
+         }
+         // blizzard.get(index2).increaseSpeed();
+         index2++;
+        }
+        if(keyPressed == KeyEvent.VK_MINUS) {
+         for(Snowflake s : blizzard) {
+            s.decreaseSpeed();
+         }
+         // blizzard.get(index2).decreaseSpeed();
+         index2--;
+        }
+        if(keyPressed == KeyEvent.VK_A) {
+         //add a new snowflake to blizzard
+         if (blizzard.size() > 0)
+            blizzard.add(new Snowflake(300, 50, 20, 20, 1, blizzard.get(0).getSpeed()));
+         else
+            blizzard.add(new Snowflake(300, 50, 20, 20, 1, (Math.random() * 4) + 1));
+        }
+        if(keyPressed == KeyEvent.VK_R) {
+         //remove a snowflake
+         if (blizzard.size() > 0)
+            blizzard.remove(blizzard.size()-1);
+        }
+        System.out.println("Current Speed:" + blizzard.get(currentIndex).getSpeed());
+        System.out.println("Amount of Snowflakes:" + blizzard.size());
+        System.out.println("Current Index:" + currentIndex);
+        System.out.println("Blizzard size:" + blizzard.size());
 	}
 	@Override
 	public void keyReleased(KeyEvent e) {
       // TODO Auto-generated method stub
-      throw new UnsupportedOperationException("Unimplemented method 'keyReleased'");
+      
 }
    @Override
    public void keyTyped(KeyEvent e) {
       // TODO Auto-generated method stub
-      throw new UnsupportedOperationException("Unimplemented method 'keyTyped'");
+      // throw new UnsupportedOperationException("Unimplemented method 'keyTyped'");
    }
 }
