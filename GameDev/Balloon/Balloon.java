@@ -2,11 +2,14 @@ package GameDev.Balloon;
 
 import java.awt.Color;
 
-public class Balloon {
+public class Balloon implements Comparable<Balloon> {
+    private static int nextId = 1;
+    private int id;
     private int diameter;
     private Color color;
 
     public Balloon(Color c, int d) {
+        this.id = nextId++;
         this.diameter = d;
         this.color = c;
     }
@@ -18,6 +21,9 @@ public class Balloon {
         this.color = c;
     }
 
+    public int getId() {
+        return this.id;
+    }
     public int getDiameter() {
         return this.diameter;
     }
@@ -26,7 +32,17 @@ public class Balloon {
     }
 
     public String toString() {
-        return "Balloon [diameter=" + diameter + ", color=" + color + "]";
+        return "Balloon [id=" + id + ", diameter=" + diameter + ", color=" + color + "]";
     }
 
+
+    @Override
+    public int compareTo(Balloon other) {
+        if(this.diameter < other.diameter)
+            return -1;
+        else if(this.diameter > other.diameter)
+            return 1;
+        else
+        return 0;
+    }
 }
