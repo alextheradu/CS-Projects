@@ -1,8 +1,10 @@
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -12,6 +14,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -24,232 +27,303 @@ public class FlappyBird extends JPanel implements MouseListener, MouseMotionList
 {
 	final int PANEL_WIDTH = 800;
 	final int PANEL_HEIGHT = 600;
-
+	
+	// Game constants
+	final int GRAVITY = 1;
+	final int JUMP_FORCE = -12;
+	final int BIRD_WIDTH = 50;
+	final int BIRD_HEIGHT = 40;
+	final int GROUND_HEIGHT = 100;
+	final int PIPE_WIDTH = 80;
+	final int PIPE_GAP = 200;
+	final int PIPE_SPEED = 4;
+	final int PIPE_SPAWN_INTERVAL = 120; // frames
+	
+	// Game variables
 	int score;
-	int x1, y1, w1, h1;
-	int x3, y3, w3, h3;
-    int birdx, birdy, birdw, birdh;
-    int hitboxX, hitboxY, hotboxW, hitboxH;
-	double xc, yc, wc, hc;
-    boolean up, down, left, right;
-    boolean isFacingRight;
-	boolean selectedRect;
-	boolean selectedRect2;
-	boolean selectedCircle;
-    List<Integer> pressedKeys = new ArrayList<>();
-
-	public FlappyBird ()
-		{
-			this.addMouseListener(this);
-			this.addMouseMotionListener(this);
-            this.addKeyListener(this);
-            this.setFocusable(true);
-            this.requestFocusInWindow();
-			w3 = h3 = 200;
-			score = 0;
-            birdx = 50;
-            birdy = 50;
-            birdw = 50;
-            birdh = 50;
-
-            isFacingRight = true;
-
-			Timer timer = new Timer(1, new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) 
-				{
-					score++;
-					x3+=2;
-                    y3+=2;
-					if(x3 > PANEL_WIDTH)
-						x3 = -w3;
-                    if(y3 > PANEL_HEIGHT)
-                        y3 = -h3;
-
-					xc+=1;
-					
-
-                    if(left) birdx--;
-                    if(right) birdx++;
-                    if(up) birdy--;
-                    if(down) birdy++;
-					if(birdx > PANEL_WIDTH)
-						birdx = -birdw;
-                    if(birdy > PANEL_HEIGHT)
-                        birdy = -birdh;
-					if(birdx < -birdw)
-						birdx = PANEL_WIDTH;
-					if(birdy < -birdh)
-						birdy = PANEL_HEIGHT;
-
-					if(xc > PANEL_WIDTH)
-						xc = -200;
-
-					hitboxX = birdx + 10;
-					hitboxY = birdy + 10;
-					hotboxW = birdw - 20;
-					hitboxH = birdh - 20;
-					repaint();
-				}
-			});
-			timer.start();
-			
+	int highScore = 0;
+	double birdY, birdVelocity;
+	int birdX;
+	boolean gameStarted = false;
+	boolean gameOver = false;
+	int frameCount = 0;
+	Random random = new Random();
+	
+	// Pipes
+	List<Rectangle> topPipes = new ArrayList<>();
+	List<Rectangle> bottomPipes = new ArrayList<>();
+	
+	// Images
+	Image backgroundImg;
+	Image birdImg;
+	Image topPipeImg;
+	Image bottomPipeImg;
+	
+	public FlappyBird()
+	{
+		this.addMouseListener(this);
+		this.addMouseMotionListener(this);
+		this.addKeyListener(this);
+		this.setFocusable(true);
+		this.requestFocusInWindow();
+		
+		// Load images
+		try {
+			backgroundImg = new ImageIcon(this.getClass().getResource("/images/background.png")).getImage();
+			birdImg = new ImageIcon(this.getClass().getResource("/images/flappybird.png")).getImage();
+			topPipeImg = new ImageIcon(this.getClass().getResource("/images/upper-pipe.png")).getImage();
+			bottomPipeImg = new ImageIcon(this.getClass().getResource("/images/lower-pipe.png")).getImage();
+		} catch (Exception e) {
+			System.out.println("Error loading images: " + e.getMessage());
+			// Use default colors if images can't be loaded
 		}
+		
+		resetGame();
+		
+		Timer timer = new Timer(16, new ActionListener() { // ~60 FPS
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				if (gameStarted && !gameOver) {
+					// Apply gravity
+					birdVelocity += GRAVITY;
+					birdY += birdVelocity;
+					
+					// Update pipes
+					updatePipes();
+					
+					// Check collisions
+					if (checkCollisions()) {
+						gameOver = true;
+						if (score > highScore) {
+							highScore = score;
+						}
+					}
+					
+					frameCount++;
+				}
+				repaint();
+			}
+		});
+		timer.start();
+	}
+	
+	private void resetGame() {
+		score = 0;
+		birdX = 150;
+		birdY = PANEL_HEIGHT / 2 - BIRD_HEIGHT / 2;
+		birdVelocity = 0;
+		gameStarted = false;
+		gameOver = false;
+		frameCount = 0;
+		topPipes.clear();
+		bottomPipes.clear();
+	}
+	
+	private void updatePipes() {
+		// Move pipes
+		for (int i = 0; i < topPipes.size(); i++) {
+			Rectangle topPipe = topPipes.get(i);
+			Rectangle bottomPipe = bottomPipes.get(i);
+			
+			topPipe.x -= PIPE_SPEED;
+			bottomPipe.x -= PIPE_SPEED;
+			
+			// Check if bird has passed a pipe to increase score
+			if (topPipe.x + PIPE_WIDTH == birdX) {
+				score++;
+			}
+		}
+		
+		// Remove pipes that are off-screen
+		for (int i = 0; i < topPipes.size(); i++) {
+			if (topPipes.get(i).x + PIPE_WIDTH < 0) {
+				topPipes.remove(i);
+				bottomPipes.remove(i);
+				i--;
+			}
+		}
+		
+		// Spawn new pipes
+		if (frameCount % PIPE_SPAWN_INTERVAL == 0) {
+			spawnPipe();
+		}
+	}
+	
+	private void spawnPipe() {
+		int pipeHeight = random.nextInt(PANEL_HEIGHT - PIPE_GAP - GROUND_HEIGHT - 100) + 50;
+		
+		// Top pipe
+		Rectangle topPipe = new Rectangle(PANEL_WIDTH, 0, PIPE_WIDTH, pipeHeight);
+		topPipes.add(topPipe);
+		
+		// Bottom pipe
+		Rectangle bottomPipe = new Rectangle(PANEL_WIDTH, pipeHeight + PIPE_GAP, PIPE_WIDTH, PANEL_HEIGHT - pipeHeight - PIPE_GAP - GROUND_HEIGHT);
+		bottomPipes.add(bottomPipe);
+	}
+	
+	private boolean checkCollisions() {
+		// Create bird hitbox
+		Rectangle birdHitbox = new Rectangle(birdX, (int)birdY, BIRD_WIDTH, BIRD_HEIGHT);
+		
+		// Check for ground collision
+		if (birdY + BIRD_HEIGHT > PANEL_HEIGHT - GROUND_HEIGHT) {
+			return true;
+		}
+		
+		// Check for ceiling collision
+		if (birdY < 0) {
+			return true;
+		}
+		
+		// Check for pipe collisions
+		for (Rectangle topPipe : topPipes) {
+			if (birdHitbox.intersects(topPipe)) {
+				return true;
+			}
+		}
+		
+		for (Rectangle bottomPipe : bottomPipes) {
+			if (birdHitbox.intersects(bottomPipe)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	private void jump() {
+		if (gameOver) {
+			resetGame();
+			return;
+		}
+		
+		if (!gameStarted) {
+			gameStarted = true;
+		}
+		
+		// Apply jump force
+		birdVelocity = JUMP_FORCE;
+	}
+	
 	public void paintComponent(Graphics g)
 	{
-		super.paintComponent(g); // Ensure proper rendering
+		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;
-		g2.setColor(new Color(135, 196, 210));
-		g2.drawRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT);
-		g2.setColor(Color.black);
-		g2.drawString("Score: " + score, 600, 50);
-
-        Image birdPic = new ImageIcon(this.getClass().getResource("bird.png")).getImage();
-        if(isFacingRight)
-			g2.drawImage(birdPic, birdx, birdy, birdw, birdh, this);
-		else
-			g2.drawImage(birdPic, birdx + 50, birdy, -birdw, birdh, this);
 		
-		g2.setColor(Color.RED); // Use a distinct color for visibility
-		g2.drawRect(hitboxX, hitboxY, hotboxW, hitboxH);
+		// Draw background
+		if (backgroundImg != null) {
+			g2.drawImage(backgroundImg, 0, 0, PANEL_WIDTH, PANEL_HEIGHT, this);
+		} else {
+			g2.setColor(new Color(135, 206, 235)); // Sky blue
+			g2.fillRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT - GROUND_HEIGHT);
+			g2.setColor(new Color(34, 139, 34)); // Forest green
+			g2.fillRect(0, PANEL_HEIGHT - GROUND_HEIGHT, PANEL_WIDTH, GROUND_HEIGHT);
+		}
 		
+		// Draw pipes
+		for (int i = 0; i < topPipes.size(); i++) {
+			Rectangle topPipe = topPipes.get(i);
+			Rectangle bottomPipe = bottomPipes.get(i);
+			
+			if (topPipeImg != null) {
+				g2.drawImage(topPipeImg, topPipe.x, topPipe.y, topPipe.width, topPipe.height, this);
+			} else {
+				g2.setColor(Color.GREEN);
+				g2.fillRect(topPipe.x, topPipe.y, topPipe.width, topPipe.height);
+			}
+			
+			if (bottomPipeImg != null) {
+				g2.drawImage(bottomPipeImg, bottomPipe.x, bottomPipe.y, bottomPipe.width, bottomPipe.height, this);
+			} else {
+				g2.setColor(Color.GREEN);
+				g2.fillRect(bottomPipe.x, bottomPipe.y, bottomPipe.width, bottomPipe.height);
+			}
+		}
+		
+		// Draw bird
+		if (birdImg != null) {
+			// Rotate bird based on velocity for more realistic movement
+			double rotation = Math.min(Math.max(birdVelocity * 2, -30), 30);
+			g2.rotate(Math.toRadians(rotation), birdX + BIRD_WIDTH/2, birdY + BIRD_HEIGHT/2);
+			g2.drawImage(birdImg, birdX, (int)birdY, BIRD_WIDTH, BIRD_HEIGHT, this);
+			g2.rotate(Math.toRadians(-rotation), birdX + BIRD_WIDTH/2, birdY + BIRD_HEIGHT/2);
+		} else {
+			g2.setColor(Color.YELLOW);
+			g2.fillOval(birdX, (int)birdY, BIRD_WIDTH, BIRD_HEIGHT);
+		}
+		
+		// Draw score
 		g2.setColor(Color.WHITE);
-		g2.fillOval(50 + (int) xc, 50, 50, 50);
-		g2.fillOval(80 + (int) xc, 35, 50, 50);
-		g2.fillOval(85 + (int) xc, 60, 40, 40);
-		g2.fillOval(105 + (int) xc, 50, 50, 50);
-		g2.fillOval(138 + (int) xc, 65, 30, 30);
+		g2.setFont(new Font("Arial", Font.BOLD, 30));
+		g2.drawString("Score: " + score, 20, 40);
+		g2.drawString("High Score: " + highScore, 20, 80);
+		
+		// Draw start/game over message
+		if (!gameStarted) {
+			g2.setColor(new Color(0, 0, 0, 150));
+			g2.fillRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT);
+			g2.setColor(Color.WHITE);
+			g2.setFont(new Font("Arial", Font.BOLD, 50));
+			g2.drawString("Flappy Bird", PANEL_WIDTH/2 - 150, PANEL_HEIGHT/2 - 50);
+			g2.setFont(new Font("Arial", Font.BOLD, 30));
+			g2.drawString("Click or press SPACE to start", PANEL_WIDTH/2 - 200, PANEL_HEIGHT/2 + 30);
+		} else if (gameOver) {
+			g2.setColor(new Color(0, 0, 0, 150));
+			g2.fillRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT);
+			g2.setColor(Color.WHITE);
+			g2.setFont(new Font("Arial", Font.BOLD, 50));
+			g2.drawString("Game Over", PANEL_WIDTH/2 - 150, PANEL_HEIGHT/2 - 50);
+			g2.setFont(new Font("Arial", Font.BOLD, 30));
+			g2.drawString("Score: " + score, PANEL_WIDTH/2 - 70, PANEL_HEIGHT/2 + 30);
+			g2.drawString("Click or press SPACE to restart", PANEL_WIDTH/2 - 220, PANEL_HEIGHT/2 + 80);
+		}
 	}
 
 	public Dimension getPreferredSize()
 	{
-		return new Dimension(800,600);
-		
+		return new Dimension(PANEL_WIDTH, PANEL_HEIGHT);
 	}
+	
 	public static void main(String[] args) {
-		JFrame frame = new JFrame("My first bad game");
+		JFrame frame = new JFrame("Flappy Bird");
 		frame.add(new FlappyBird());
 		frame.pack();
 		frame.setLocationRelativeTo(null);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 	}
+	
 	@Override
 	public void mouseClicked(MouseEvent e)
 	{
+		jump();
 	}
-	public static boolean isInRectangle(int x, int y, int w, int h, int xm, int ym)
-	{
-		return xm > x && xm < x + w && ym > y && ym < y + h;
-	}
-	public static boolean isInCircle(int x, int y, int w, int h, int xm, int ym)
-	{
-		//Calculate radius
-		int r = w / 2;
-		//Calculate coordinates of center
-		int xc = x + r;
-		int yc = y + r;
-		double dist = (Math.sqrt(Math.pow(yc-ym, 2) + Math.pow(xc-xm,2)));
-		return dist < r;
+	
+	// Other mouse methods remain unchanged
+	@Override
+	public void mousePressed(MouseEvent e) {}
+	@Override
+	public void mouseReleased(MouseEvent e) {}
+	@Override
+	public void mouseEntered(MouseEvent e) {}
+	@Override
+	public void mouseExited(MouseEvent e) {}
+	@Override
+	public void mouseDragged(MouseEvent e) {}
+	@Override
+	public void mouseMoved(MouseEvent e) {}
+	
+	@Override
+	public void keyTyped(KeyEvent e) {}
+	
+	@Override
+	public void keyPressed(KeyEvent e) {
+		if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+			jump();
+		}
 	}
 	
 	@Override
-	public void mousePressed(MouseEvent e)
-	{
-		//Get mouse coordinates
-		int xm = e.getX();
-		int ym = e.getY();
-	}
-	@Override
-	public void mouseReleased(MouseEvent e)
-	{
-	}
-	@Override
-	public void mouseEntered(MouseEvent e)
-	{
-	}
-	@Override
-	public void mouseExited(MouseEvent e)
-	{
-	}
-	@Override
-	public void mouseDragged(MouseEvent e)
-	{
-		int xm = e.getX();
-		int ym = e.getY();
-
-	}
-	@Override
-	public void mouseMoved(MouseEvent e)
-	{
-		int xm = e.getX();
-		int ym = e.getY();
-		
-	}
-	@Override
-	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'keyTyped'");
-	}
-	@Override
-	public void keyPressed(KeyEvent e) {
-        int keyPressed = e.getKeyCode();
-        if (!pressedKeys.contains(keyPressed)) {
-            pressedKeys.add(keyPressed);
-        }
-        System.out.println("Key Pressed");
-        System.out.println(keyPressed);
-        if(keyPressed == 39)
-		{
-			right = true; left = false; up = false; down = false;
-		}
-        else if(keyPressed == 37)
-		{ 
-			left = true; right = false; up = false; down = false;
-		}
-        else if(keyPressed == 38){
-			up = true; right = false; left = false; down = false;
-		}
-        else if(keyPressed == 40)
-		{ 
-			down = true; right = false; left = false; up = false;
-		}
-        if(keyPressed == 39) isFacingRight = true;
-        else if(keyPressed == 37) isFacingRight = false;
-	}
-	@Override
-	public void keyReleased(KeyEvent e) {
-        int keyReleased = e.getKeyCode();
-        pressedKeys.remove(Integer.valueOf(keyReleased));
-        {
-			left = right = up = down = false;
-        
-        // Handle horizontal direction
-        for (int i = pressedKeys.size() - 1; i >= 0; i--) {
-            int key = pressedKeys.get(i);
-            if (key == KeyEvent.VK_LEFT) {
-                left = true;
-                isFacingRight = false;
-            } else if (key == KeyEvent.VK_RIGHT) {
-                right = true;
-                isFacingRight = true;
-            }
-        }
-        
-        // Handle vertical direction
-        for (int i = pressedKeys.size() - 1; i >= 0; i--) {
-            int key = pressedKeys.get(i);
-            if (key == KeyEvent.VK_UP) {
-                up = true;
-            } else if (key == KeyEvent.VK_DOWN) {
-                down = true;
-            }
-		}
-        if(keyReleased == 39) right = false;
-        else if(keyReleased == 37) left = false;
-        else if(keyReleased == 38) up = false;
-        else if(keyReleased == 40) down = false;
-
-	}
-	}
+	public void keyReleased(KeyEvent e) {}
 }
